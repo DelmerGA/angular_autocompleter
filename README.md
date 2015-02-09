@@ -6,7 +6,7 @@ Created for Angular 1.3
 
 Just add a `script` for the `autocompleter`.
 
-```
+```html
 <script type="text/javascript" src="javascripts/autocompleter.js" ></script>
 ```
 
@@ -20,7 +20,7 @@ angular.module("YourApp", [
 
 Where you might add some html like the following:
 
-```
+```html
 <div ng-app="YourApp">
   <div ng-controller="YourCtrl">
     <auto-complete on-change="logSuggestions(words)" load-handler="load"></auto-complete>
@@ -32,7 +32,7 @@ Where you might add some html like the following:
 
 There are two ways load words into the `<auto-complete>` directive. One way is just to do the following:
 
-```
+```javascript
 angular("YourCtrl", ["$scope", function (scope) {
   $scope.load = function () {
     return [
@@ -49,7 +49,7 @@ angular("YourCtrl", ["$scope", function (scope) {
 The other way is to load them asynchronously
 
 
-```
+```javascript
 angular("YourCtrl", ["$scope", "$http", function (scope, $http) {
   $scope.load = function (done) {
     $http.get("/mywords.json")
