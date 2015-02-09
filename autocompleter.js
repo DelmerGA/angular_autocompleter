@@ -59,99 +59,104 @@
       };
       return Trie;
     })
-    .directive("autoComplete", ["$timeout", "Trie", "$parse", function ($timeout, Trie, $parse){
-      
-         var config = (function(Storage, $timeout){
+    .directive("autoComplete", ["$timeout", "Trie", "$http", function ($timeout, Trie, $http){
           
-           Config.Storage = Storage;
-           
-           function Config(){
-           
-             var inputTag       =  "<input type='text' " + 
-                                    " ng-model='searchWord' " + 
-                                    " ng-blur='handleBlur()' " + 
-                                    " ng-focus='handleFocus()'/> ";
+       Config.Storage = Storage;
+       
+       function Config(){
+       
+         var inputTag       =  "<input type='text' " + 
+                                " ng-model='searchWord' " + 
+                                " ng-blur='handleBlur()' " + 
+                                " ng-focus='handleFocus()'/> ";
 
-             var resultsTag     =  "<div class='results' " + 
-                                    " ng-repeat='result in results' " + 
-                                     "ng-show='showResults'>" +
-                                        "{{result}}" +
-                                   "</div>";
+         var resultsTag     =  "<div class='results' " + 
+                                " ng-repeat='result in results' " + 
+                                 "ng-show='showResults'>" +
+                                    "{{result}}" +
+                               "</div>";
 
-             this.template      = "<div>" +
-                                    inputTag +
-                                    resultsTag +
-                                 "</div>";
+         this.template      = "<div>" +
+                                inputTag +
+                                resultsTag +
+                             "</div>";
 
-             this.scope         = {
-                                    suggest: "&onChange",
-                                    loadHandler: "="
-                                 };
+         this.scope         = {
+                                suggest: "&onChange",
+                                loadHandler: "=",
+                                url: "@"
+                             };
 
-             this.restrict      = "AEC";
+         this.restrict      = "AEC";
 
+      }
+
+      var setupUI = function () {
+          var scope = this;
+        
+          var toggleResults    = function () {
+            scope.showResults = !scope.showResults;
+          };
+        
+          this.handleBlur   = function () {
+            $timeout(function(){ 
+              toggleResults();
+            }, 500);
+          };
+        
+          this.handleFocus  = function () {
+            $timeout(toggleResults,0, true);
+          };
+        
+      };
+      
+      var loadWords = function(scope, words){
+        if (arguments.length < 2){
+          var called = 0;
+          return function(words){ 
+            called += 1;
+            loadWords.call(scope, scope, words);
+          };
+        }
+ 
+        words.forEach(function (word) {
+          scope.storage.push(word);
+        });
+        
+        scope.$watch("searchWord", function (value) {
+          if (value) {
+            scope.showResults  = true;
+            scope.results      = scope.storage.autoComplete(value);
+            scope.suggest({words: scope.results});
           }
-
-          var setupUI = function () {
-              var scope = this;
-            
-              var toggleResults    = function () {
-                scope.showResults = !scope.showResults;
-              };
-            
-              this.handleBlur   = function () {
-                $timeout(function(){ 
-                  toggleResults();
-                }, 500);
-              };
-            
-              this.handleFocus  = function () {
-                $timeout(toggleResults,0, true);
-              };
-            
-          };
-          
-          var loadWords = function(scope, words){
-            if (arguments.length < 2){
-              var called = 0;
-              return function(words){ 
-                called += 1;
-                loadWords.call(scope, scope, words);
-              };
-            }
-     
-            words.forEach(function (word) {
-              scope.storage.push(word);
-            });
-            
-            scope.$watch("searchWord", function (value) {
-              if (value) {
-                scope.showResults  = true;
-                scope.results      = scope.storage.autoComplete(value);
-                scope.suggest({words: scope.results});
-              }
-            });  
-          };
-          
-           
-          var setupEvents = function () {
-            this.storage       = new Config.Storage();
-            var loader         = loadWords(this);
-            var results        = this.loadHandler(loader);
-            if (results !== undefined && results instanceof Array) {
-              loader(results);
-            }
-          };
-           
-          Config.prototype.link = function (scope, element, attrs) {
-            setupEvents.call(scope);
-            setupUI.call(scope);   
-          };
-
-           return new Config();
-         })(Trie, $timeout);
+        });  
+      };
       
-         return config;
+       
+      var setupEvents = function () {
+        this.storage       = new Config.Storage();
+        if (!this.url) {
+          var loader         = loadWords(this);
+          var results        = this.loadHandler(loader);
+          if (results !== undefined && results instanceof Array) {
+            loader(results);
+          }
+        } else {
+          $http.get(url).
+            success(loader).
+            error(function(){
+              loader([])
+            })
+        }
+
+      };
+       
+      Config.prototype.link = function (scope, element, attrs) {
+        setupEvents.call(scope);
+        setupUI.call(scope);   
+      };
+
+      return new Config();
        
      }]);
 })();
