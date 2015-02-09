@@ -22,7 +22,7 @@
           this.isWord  = true;
         }
         return this;
-      };
+      }
 
       Trie.prototype.getWords = function(words, currentWord){
         words = words || [];
@@ -84,9 +84,8 @@
                                  "</div>";
 
              this.scope         = {
-                                  seedWords: "=",
-                                  suggest: "&onChange",
-                                  loadHandler: "="
+                                    suggest: "&onChange",
+                                    loadHandler: "="
                                  };
 
              this.restrict      = "AEC";
@@ -136,8 +135,12 @@
           
            
           var setupEvents = function () {
-              this.storage       = new Config.Storage();
-             var results         = this.loadHandler(loadWords(this));
+            this.storage       = new Config.Storage();
+            var loader         = loadWords(this);
+            var results        = this.loadHandler(loader);
+            if (results !== undefined && results instanceof Array) {
+              loader(results);
+            }
           };
            
           Config.prototype.link = function (scope, element, attrs) {
