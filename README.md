@@ -30,7 +30,7 @@ Where you might add some html like the following:
 ```
 
 
-There are two ways load words into the `<auto-complete>` directive. One way is just to do the following:
+There are three ways load words into the `<auto-complete>` directive. One way is just to do the following:
 
 ```javascript
 angular("YourCtrl", ["$scope", function (scope) {
@@ -46,7 +46,7 @@ angular("YourCtrl", ["$scope", function (scope) {
 }]);
 ```
 
-The other way is to load them asynchronously
+Another way is to load them asynchronously
 
 
 ```javascript
@@ -59,6 +59,18 @@ angular("YourCtrl", ["$scope", "$http", function (scope, $http) {
   };
 }]);
 ```
+
+Lastly, we can just supply a url.
+
+```html
+<div ng-app="YourApp">
+  <div ng-controller="YourCtrl">
+    <auto-complete on-change="logSuggestions(words)" url="/mywords.json"></auto-complete>
+  </div>
+</div>
+
+```
+
 
 
 
