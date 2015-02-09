@@ -12,7 +12,7 @@ Just add a `script` for the `autocompleter`.
 
 Then add it to your app dependencies.
 
-```
+```javascript
 angular.module("YourApp", [
   "AutoCompleter"
 ]);
